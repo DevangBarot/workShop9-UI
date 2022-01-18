@@ -21,6 +21,7 @@ import * as moment from 'moment';
 import { RouterModule } from '@angular/router';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { MomentDatePipe } from './pipes/moment-date.pipe';
+import { DateTimeComponent } from './components/date-time/date-time.component';
 
 export function momentAdapterFactory() {
     return adapterFactory(moment);
@@ -36,7 +37,8 @@ export function momentAdapterFactory() {
     EditorComponent,
     DataTableComponent,
     SearchPanelComponent,
-    MomentDatePipe
+    MomentDatePipe,
+    DateTimeComponent
   ],
   imports: [
     RouterModule,
