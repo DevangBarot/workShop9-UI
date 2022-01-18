@@ -23,8 +23,8 @@ export class DateTimeComponent implements OnInit {
   public minimumDate: object | undefined;
 
   dateControl = new FormControl();
-  @Input() SystemConf: { [x: string]: any; } | undefined;
-  @Input() arrayIndex: null | undefined;
+  @Input() SystemConf:any = {};
+  @Input() arrayIndex:number =  0 ;
   @Output() dateUtc: EventEmitter<object> = new EventEmitter<object>();
   @Output() timeUtc: EventEmitter<object> = new EventEmitter<object>();
   @Output() invalid: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -33,7 +33,7 @@ export class DateTimeComponent implements OnInit {
   @Input() dateObject: string | undefined;
   @Input() timeObject: string | undefined;
   @Input() setCurrent: boolean | undefined;
-  @Input() addObj: object | undefined;
+  @Input() addObj: any = {};
   @Input() StartEndDateFilter: boolean | undefined;
   @Input() customClass: String = 'col-sm-6';
   @Input() startDate: object | undefined;
@@ -81,7 +81,7 @@ export class DateTimeComponent implements OnInit {
   constructor() {
     this.utcDateAndTime = this.utcDateTimeForm;
     const timeZone = moment.tz.guess()
-    this.utcDateAndTime.get('time').valueChanges.subscribe((res) => {
+    this.utcDateAndTime.get('time')!.valueChanges.subscribe((res) => {
       if (res && res['hour'] !== null && res['hour'] !== undefined) {
         this.setTime(res);
       }
@@ -111,42 +111,42 @@ export class DateTimeComponent implements OnInit {
       this.dateObject = change['dateObject'].currentValue;
       const timeZone = moment.tz.guess()
       const cdate = moment(this.dateObject).tz(timeZone)
-      this.utcDateAndTime.get('date').setValue(cdate);
+      this.utcDateAndTime.get('date')!.setValue(cdate);
     } else {
       // this.utcDateAndTime.reset();
     }
     if (change['StartEndDateFilter'] && change['StartEndDateFilter'].currentValue !== undefined) {
-      this.utcDateAndTime.get('date').reset();
+      this.utcDateAndTime.get('date')!.reset();
     }
   }
 
   ngOnInit() {
-    this.returnObj['arrayIndex'] = this.arrayIndex;
+    this.returnObj.arrayIndex = this.arrayIndex;
     const timeZone = moment.tz.guess()
     if (this.SystemConf['ordType'] && this.SystemConf['ordType'] !== 'LTL') {
-      this.utcDateAndTime.get('date').reset();
-      this.utcDateAndTime.get('date').clearValidators();
-      this.utcDateAndTime.get('date').updateValueAndValidity();
-      this.utcDateAndTime.get('date').markAsUntouched();
-      this.utcDateAndTime.get('date').setValidators([Validators.required])
-      this.utcDateAndTime.get('date').updateValueAndValidity();
-      this.utcDateAndTime.get('time').reset();
-      this.utcDateAndTime.get('time').clearValidators();
-      this.utcDateAndTime.get('time').updateValueAndValidity();
-      this.utcDateAndTime.get('time').markAsUntouched();
-      this.utcDateAndTime.get('time').setValidators([Validators.required])
-      this.utcDateAndTime.get('time').updateValueAndValidity();
+      this.utcDateAndTime.get('date')!.reset();
+      this.utcDateAndTime.get('date')!.clearValidators();
+      this.utcDateAndTime.get('date')!.updateValueAndValidity();
+      this.utcDateAndTime.get('date')!.markAsUntouched();
+      this.utcDateAndTime.get('date')!.setValidators([Validators.required])
+      this.utcDateAndTime.get('date')!.updateValueAndValidity();
+      this.utcDateAndTime.get('time')!.reset();
+      this.utcDateAndTime.get('time')!.clearValidators();
+      this.utcDateAndTime.get('time')!.updateValueAndValidity();
+      this.utcDateAndTime.get('time')!.markAsUntouched();
+      this.utcDateAndTime.get('time')!.setValidators([Validators.required])
+      this.utcDateAndTime.get('time')!.updateValueAndValidity();
     }
     if (this.SystemConf['isRequired']) {
-      this.utcDateAndTime.get('date').clearValidators();
-      this.utcDateAndTime.get('date').setValidators([Validators.required])
-      this.utcDateAndTime.get('date').updateValueAndValidity();
+      this.utcDateAndTime.get('date')!.clearValidators();
+      this.utcDateAndTime.get('date')!.setValidators([Validators.required])
+      this.utcDateAndTime.get('date')!.updateValueAndValidity();
     }
 
     if (this.dateObject) {
       const cdate = moment(this.dateObject).tz(timeZone)
-      this.utcDateAndTime.get('date').setValue(cdate);
-      this.utcDateAndTime.get('date').setValue(cdate);
+      this.utcDateAndTime.get('date')!.setValue(cdate);
+      this.utcDateAndTime.get('date')!.setValue(cdate);
     }
     if (this.timeObject) {
       const sTime = this.timeObject
@@ -156,15 +156,15 @@ export class DateTimeComponent implements OnInit {
         'minute': moment(sTime).tz(timeZone).minutes(),
         'second': moment(sTime).tz(timeZone).seconds()
       };
-      this.utcDateAndTime.get('time').setValue(time);
+      this.utcDateAndTime.get('time')!.setValue(time);
     }
     if (this.setCurrent === true) {
-      const timeZone = this.storageService.getItem('datePreference');
+      const timeZone = moment.tz.guess()
       let cDateAndTime = null;
       if (this.addObj !== undefined && (this.addObjType.indexOf(this.addObj['duration']) != -1)) {
         cDateAndTime = moment().tz(timeZone).add(this.addObj['duration'], this.addObj['value'])
-        this.utcDateAndTime.get('date').setValue(cDateAndTime);
-        this.utcDateAndTime.get('time').setValue(this.getCurrentTimeFromTZ(cDateAndTime))
+        this.utcDateAndTime.get('date')!.setValue(cDateAndTime);
+        this.utcDateAndTime.get('time')!.setValue(this.getCurrentTimeFromTZ(cDateAndTime))
         this.returnObj['date'] = cDateAndTime.toISOString()
         this.returnObj['time'] = cDateAndTime.toISOString()
         this.dateUtc.emit(this.returnObj)
@@ -172,8 +172,8 @@ export class DateTimeComponent implements OnInit {
       } else {
         cDateAndTime = moment().tz(timeZone ? timeZone : moment.tz.guess());
         let currentDate = this.getCurrentDateFromTZ(cDateAndTime);
-        this.utcDateAndTime.get('date').setValue(cDateAndTime)
-        this.utcDateAndTime.get('time').setValue(this.getCurrentTimeFromTZ(cDateAndTime));
+        this.utcDateAndTime.get('date')!.setValue(cDateAndTime)
+        this.utcDateAndTime.get('time')!.setValue(this.getCurrentTimeFromTZ(cDateAndTime));
         this.returnObj['date'] = cDateAndTime.toISOString();
         this.returnObj['time'] = cDateAndTime.toISOString();
         this.dateUtc.emit(this.returnObj)
@@ -189,13 +189,13 @@ export class DateTimeComponent implements OnInit {
   }
 
   getCurrentDateFromTZ(dateObj: moment.MomentInput) {
-    const timeZone = this.storageService.getItem('datePreference');
+    const timeZone = moment.tz.guess()
     let tz = moment(dateObj).tz(timeZone)
     return { 'year': tz.get('year'), 'month': tz.get('month') + 1, 'day': tz.get('date') }
   }
 
   getCurrentTimeFromTZ(dateObj: moment.MomentInput) {
-    const timeZone = this.storageService.getItem('datePreference');
+    const timeZone = moment.tz.guess()
     let tz = moment(dateObj).tz(timeZone)
     return { 'hour': tz.get('hour'), 'minute': tz.get('minute'), 'second': tz.get('second') }
   }
@@ -212,8 +212,8 @@ export class DateTimeComponent implements OnInit {
     const selectedDate = date.value as moment.Moment
     const ngbDateObj = selectedDate.toObject()
     const sDate = {'year': ngbDateObj['years'], 'month': ngbDateObj['months'] + 1, 'day': ngbDateObj['date'] };
-    let timeZone = this.storageService.getItem('datePreference');
-    const selectedTime = this.utcDateAndTime.get('time').value
+    const timeZone = moment.tz.guess()
+    const selectedTime = this.utcDateAndTime.get('time')!.value
     let utcDate: string = ''
     if (selectedTime && selectedTime['hour'] !== null) {
       utcDate = this.nativeDateFromTime(sDate, selectedTime)
@@ -231,15 +231,15 @@ export class DateTimeComponent implements OnInit {
   }
 
   setTime(time: NgbTimeStruct) {
-    let timeZone = this.storageService.getItem('datePreference');
-    let date = this.utcDateAndTime.get('date').value as moment.Moment;
+    const timeZone = moment.tz.guess()
+    let date = this.utcDateAndTime.get('date')!.value as moment.Moment;
     const ngbDateObj = date.toObject()
-    const timeControl = this.utcDateAndTime.get('time');
+    let timeControl: FormControl = this.utcDateAndTime.get('time') as FormControl;
     const selectedDate = moment(date).tz(timeZone) as moment.Moment
 
     // const selectedDate = moment(date) as moment.Moment
     const sDate = { 'year': ngbDateObj['years'], 'month': ngbDateObj['months'] + 1, 'day': ngbDateObj['date'] };
-    let utcTime: string = null;
+    let utcTime: string = '';
     if (timeControl.valid) {
       if (selectedDate && selectedDate['day'] !== null) {
         utcTime = this.nativeDateFromTime(sDate, time)
@@ -247,7 +247,7 @@ export class DateTimeComponent implements OnInit {
         this.returnObj['date'] = utcTime;
         this.timeUtc.emit(this.returnObj);
       } else {
-        const timeZone = this.storageService.getItem('datePreference');
+        const timeZone = moment.tz.guess()
         utcTime = moment().tz(timeZone).toISOString();
         this.returnObj['time'] = utcTime;
         this.returnObj['date'] = utcTime;
@@ -259,13 +259,13 @@ export class DateTimeComponent implements OnInit {
   }
 
   nativeDateFromTime(date?: { [x: string]: any; year?: number; month?: number; day?: number; } | undefined, time?: NgbTimeStruct) {
-    const timeZone = this.storageService.getItem('datePreference') ? this.storageService.getItem('datePreference') : momentTz.tz.guess();
+    const timeZone = momentTz.tz.guess();
     var dat = moment().tz(timeZone);
     const dh = ((time !== undefined && 'hour' in time) ? time['hour'] : dat.hours())
     const dm = ((time !== undefined && 'minute' in time) ? time['minute'] : dat.minutes())
     const ds = ((time !== undefined && 'second' in time) ? time['second'] : dat.seconds())
     const dd = ((date !== undefined && date['day']) ? date['day'] : dat.date())
-    const dmm = ((date !== undefined && date['month']) ? this.month[date['month']] : dat.month())
+    const dmm = ((date !== undefined && date['month']) ? this.month?[date['month']] : dat.month())
     const dy = (date !== undefined && date['year']) ? date['year'] : dat.year()
     let tz = moment.tz(timeZone)
     tz.set('year', dy); tz.set('month', dmm); tz.set('date', dd); tz.set('hour', dh); tz.set('minute', dm); tz.set('second', ds);
