@@ -19,6 +19,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { adapterFactory } from 'angular-calendar/date-adapters/moment';
 import * as moment from 'moment';
 import { RouterModule } from '@angular/router';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { MomentDatePipe } from './pipes/moment-date.pipe';
 
 export function momentAdapterFactory() {
     return adapterFactory(moment);
@@ -33,7 +35,8 @@ export function momentAdapterFactory() {
     CalendarComponent,
     EditorComponent,
     DataTableComponent,
-    SearchPanelComponent
+    SearchPanelComponent,
+    MomentDatePipe
   ],
   imports: [
     RouterModule,
@@ -46,7 +49,8 @@ export function momentAdapterFactory() {
     ReactiveFormsModule,
     FontAwesomeModule,
     FlatpickrModule.forRoot(),
-    CalendarModule.forRoot({ provide: DateAdapter, useFactory: momentAdapterFactory })
+    CalendarModule.forRoot({ provide: DateAdapter, useFactory: momentAdapterFactory }),
+    NgxPaginationModule
   ],
   exports:[
     SideBarComponent,
@@ -55,7 +59,10 @@ export function momentAdapterFactory() {
     CalendarComponent,
     EditorComponent,
     DataTableComponent,
-    SearchPanelComponent
+    SearchPanelComponent,
+    NgxPaginationModule,
+    MomentDatePipe,
+    FontAwesomeModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

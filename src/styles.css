@@ -59,3 +59,10 @@
     }
 }
 
+.justify-content-right{
+    justify-content: right !important;
+}
+.action-icons fa-icon{
+    color: #2199e8;
+    cursor: pointer;
+}

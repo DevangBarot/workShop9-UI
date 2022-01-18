@@ -1,1 +1,70 @@
-<p>list works!</p>
+<!-- Main content -->
+<section class="content">
+  <div class="container-fluid">
+    <div class="row mb-5">
+      <div class="col-12 pull-right">
+        <button class="btn btn-primary" [routerLink]="ui.createBlog()">Add</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <h3 class="card-title">Event List</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                  <table id="example2" class="table table-bordered table-hover">
+                    <thead>
+                      <tr>
+                        <th>Event</th>
+                        <th>Category</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>CreatedBy</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        *ngFor="let item of listData | paginate: { id: 'listId',itemsPerPage: paginationObject['limit'], currentPage: paginationObject['page'], totalItems:totalCount}; let i = index">
+                        <td>{{item.title}}</td>
+                        <td>{{item.categoryTitle}}
+                        </td>
+                        <td>{{item.startDateTime|momentDate:dateFormat:selectedTimeZone}}</td>
+                        <td>{{item.endDateTime|momentDate:dateFormat:selectedTimeZone}}</td>
+                        <td>{{item.createdName}}</td>
+                        <td>
+                          <div class="d-flex justify-content-between action-icons">
+                            <fa-icon [icon]="fontData.calender"></fa-icon>
+                            <fa-icon [icon]="fontData.join"></fa-icon>
+                            <fa-icon [icon]="fontData.active" *ngIf="item.isActive"></fa-icon>
+                            <fa-icon [icon]="fontData.inActive" *ngIf="!item.isActive"></fa-icon>
+                            <fa-icon [icon]="fontData.edit"></fa-icon>
+                            <fa-icon [icon]="fontData.delete"></fa-icon>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="pagination-panel d-flex justify-content-right mt-10 flex-wrap">
+                  <pagination-controls id="listId" (pageChange)="changePage($event)"></pagination-controls>
+                </div>
+                <!-- /.card-body -->
+              </div>
+              <!-- /.card -->
+
+            </div>
+            <!-- /.col -->
+          </div>
+          <!-- /.row -->
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- /.content -->

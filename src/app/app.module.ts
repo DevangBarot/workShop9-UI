@@ -19,6 +19,9 @@ import { CommonModule } from '@angular/common';
 import { BlogsModule } from './modules/blogs/blogs.module';
 import { EventsModule } from './modules/events/events.module';
 import { SharedModule } from './shared/shared.module';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpInterceptorService } from './shared/interceptors/http.interceptor';
+import { ToastrModule } from 'ngx-toastr';
 
 export function momentAdapterFactory() {
   return adapterFactory(moment);
@@ -45,9 +48,12 @@ export function momentAdapterFactory() {
     NgbModalModule,
     BlogsModule,
     EventsModule,
-    SharedModule
+    SharedModule,
+    ToastrModule.forRoot(),
   ],
-  providers: [],
+  providers: [
+    { provide: HTTP_INTERCEPTORS, useClass: HttpInterceptorService, multi: true }
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
