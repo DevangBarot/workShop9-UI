@@ -42,7 +42,11 @@ export class UiService {
     const page = 'blogs/create';
     return `${basePath}/${page}`
   }
-
+  createEvent() {
+    const basePath = this.root();
+    const page = 'events/create';
+    return `${basePath}/${page}`
+  }
   dashboard() {
     const basePath = this.root();
     const page = 'dashboard';
