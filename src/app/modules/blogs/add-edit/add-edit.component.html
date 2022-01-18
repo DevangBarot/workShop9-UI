@@ -1,30 +1,35 @@
-<form [formGroup]="creatUpdateBlog" autocomplete="off">
+<form [formGroup]="creatUpdateBlog" (submit)="saveBlog()" autocomplete="off">
     <div class="form-group">
-        <label for="exampleFormControlInput1">Post Title</label>
-        <input type="email" class="form-control" id="exampleFormControlInput1" placeholder="name@example.com">
+        <label for="postTitle">Post Title</label>
+        <input type="text" class="form-control" id="postTitle" formControlName="title">
     </div>
     <div class="form-group">
-        <label for="exampleFormControlSelect1">Category</label>
-        <select class="form-control" id="exampleFormControlSelect1">
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
+        <label for="postCategory">Post Content</label>
+        <select formControlName="categoryId" id="postCategory" name="customerType" class="form-control">
+            <option [ngValue]="null" disabled>Select</option>
+            <option [ngValue]="category['_id']" *ngFor="let category of allBlogCategories">
+                {{category['title']}}
+            </option>
         </select>
     </div>
     <div class="form-group">
-        <label for="exampleFormControlSelect2">Post Content</label>
-        <select multiple class="form-control" id="exampleFormControlSelect2">
-            <option>1</option>
-            <option>2</option>
-            <option>3</option>
-            <option>4</option>
-            <option>5</option>
-        </select>
+        <label for="postContent">Content</label>
+        <textarea class="form-control" formControlName="content" id="postContent" rows="3"></textarea>
     </div>
-    <div class="form-group">
-        <label for="exampleFormControlTextarea1">Tags</label>
-        <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+
+    <div class="input-group" formArrayName="tags">
+        <label for="tags">Tags</label>
+        <div class="input-group mb-3" *ngFor="let tags of tagList['controls'];let tagIndex = index" [formGroupName]="tagIndex">
+            <input type="text" class="form-control rounded-0" id="tags" />
+            <span class="input-group-append">
+                <button type="button" class="btn btn-info btn-flat" *ngIf="tagIndex === tagList.length - 1"
+                    (click)="addTags()">+</button>
+                <button type="button" class="btn btn-info btn-flat" *ngIf="tagList.length - 1 !== 0"
+                    (click)="removeTags(tagIndex)">-</button>
+            </span>
+        </div>
     </div>
+
+    <button class="btn btn-primary" type="button" (click)="resetBlog()">Clear</button>
+    <button class="btn btn-primary" type="submit">Save</button>
 </form>
