@@ -4,6 +4,7 @@ import { ListComponent } from './list/list.component';
 import { AddEditComponent } from './add-edit/add-edit.component';
 import { BlogRoutingModule } from './blog-routing.module';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 
@@ -15,6 +16,7 @@ import { SharedModule } from 'src/app/shared/shared.module';
   imports: [
     CommonModule,
     BlogRoutingModule,
+    ReactiveFormsModule,
     SharedModule
   ]
 })
