@@ -1,12 +1,9 @@
-<form [formGroup]="utcDateAndTime" autocomplete="off">
+<!-- <form [formGroup]="utcDateAndTime" autocomplete="off">
     <div class="row" id="mat-date-picker">
         <div [ngClass]="customClass" id="order-datepicker"
             *ngIf="SystemConf['visible'] === 'DATE' || SystemConf['visible'] === 'BOTH'">
             <div class=""
                 [ngClass]="SystemConf['dateLabel']==='End Date' ? 'date-picker-panel enddate-cal' : 'date-picker-panel' ">
-                <!-- <label for="pickUpDate" class="info-label font-12 font-500">
-                    {{ SystemConf['dateLabel'] }}{{ ['FTL','EXPEDITE','DIRECT_DRIVE'].includes(SystemConf['visible']) ? '*' : ''}}
-                </label> -->
                 <div class="input-group">
                     <input class="form-control" placeholder="yyyy-mm-dd" name="pickupDate" ngbDatepicker
                         [minDate]="minimumDate" [maxDate]="maximumDate" #pickupDate="ngbDatepicker"
@@ -17,17 +14,6 @@
                             type="button"></button>
                     </div>
                 </div>
-                <!-- <div class="error-block" *ngIf="date.touched">
-                        <span class="error-txt"
-                            *ngIf="pickupDateObj.invalid">
-                            This is Required Field</span>
-                    </div>
-            </div>
-        </div>
-        <div class="{{customClass}}" *ngIf="['TIME','BOTH'].includes(SystemConf['visible'])">
-            <div class="form-group position-relative">
-                <!-- <label for="" class="section-subtitle-label">{{ SystemConf['timeLabel'] }}{{ ['FTL','EXPEDITE','DIRECT_DRIVE'].includes(SystemConf['visible']) ? '*' : ''}}
-                </label> -->
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="d-flex">
@@ -41,4 +27,4 @@
             </div>
         </div>
     </div>
-</form>
+</form> -->

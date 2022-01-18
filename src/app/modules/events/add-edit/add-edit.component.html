@@ -13,5 +13,40 @@
         <label for="description">Description</label>
         <angular-editor formControlName="description" [config]="editorConfig" id="description"></angular-editor>
     </div>
-    <button type="button" class="btn btn-block btn-primary btn-sm">Save</button>
+    <div>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" formControlName="isFeatured">
+            <label class="form-check-label">Featured</label>
+          </div>
+    </div>
+    <div class="form-group">
+        <label for="description">Event Sponsors</label>
+        <div class="file-select-input">
+            <input [formControl]="sponsorDoc" type="file" class=""
+            multiple (change)="uploadDocument($event,'sponsorDoc')" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="description">Upload Event Images</label>
+        <div class="file-select-input">
+            <input [formControl]="mediaDoc" type="file" class=""
+            multiple (change)="uploadDocument($event,'mediaDoc')" />
+        </div>
+    </div>
+    <div class="input-group" formArrayName="galleryVideos">
+        <label for="tags">Upload Event video </label>
+        <div class="input-group mb-3" *ngFor="let tags of galleryVideos['controls'];let tagIndex = index" [formGroupName]="tagIndex">
+            <input type="text" class="form-control rounded-0" id="tags" />
+            <span class="input-group-append">
+                <button type="button" class="btn btn-info btn-flat" *ngIf="tagIndex === galleryVideos.length - 1"
+                    (click)="addTags()">+</button>
+                <button type="button" class="btn btn-info btn-flat" *ngIf="galleryVideos.length - 1 !== 0"
+                    (click)="removeTags(tagIndex)">-</button>
+            </span>
+        </div>
+    </div>
+
+    
+    <button class="btn btn-primary" type="button" (click)="resetEvent()">Clear</button>
+    <button class="btn btn-primary" type="submit" (click)="saveEvent()">Save</button>
 </form>
