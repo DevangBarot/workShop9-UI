@@ -24,10 +24,15 @@ export class BlogsService {
     const url = this.apiUrl + this.userId + '/list';
     return this.http.post(url, reqObj);
   }
+
   add(reqObj: any) {
     const url = this.apiUrl + this.userId;
+    if(reqObj['_id']){
+      return this.http.put(url, reqObj)
+    }
     return this.http.post(url, reqObj);
   }
+
   update(reqObj: any) {
     const url = this.apiUrl + this.userId;
     return this.http.put(url, reqObj);

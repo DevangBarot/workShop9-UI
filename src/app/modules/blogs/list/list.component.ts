@@ -16,11 +16,14 @@ export class ListComponent implements OnInit {
   pageLimitList: Array<number> = [5, 10, 20, 50, 100]
   paginationObject = { isPagination: true, page: 1, limit: 5, filterList: [], sortHeader: "createAt", sortDirection: "ASC" }
   fontData = { edit: faEdit, delete: faTrash, active: faToggleOn, inActive: faToggleOff };
-  constructor(public ui: UiService, public sharedService: SharedService, public blogsService: BlogsService) { }
+  constructor(public ui: UiService, 
+    public sharedService: SharedService, 
+    public blogsService: BlogsService) { }
 
   ngOnInit(): void {
     this.getList();
   }
+
   getList() {
     this.sharedService.changeLoaderStatus(true)
     this.blogsService.list(this.paginationObject).subscribe((res: any) => {

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BlogsService } from 'src/app/shared/services/blogs.service';
 import { UiService } from 'src/app/shared/services/ui.service';
 
@@ -24,6 +24,7 @@ export class AddEditComponent implements OnInit {
     })
   }
   constructor(private blog: BlogsService,
+    private route: ActivatedRoute,
     private ui: UiService,private router: Router) { 
     this.creatUpdateBlog = this.blogForm;
   }
@@ -34,6 +35,13 @@ export class AddEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllBlogCategories();
+    const blogId = this.route.snapshot.params?.id;
+    if(blogId){
+      this.creatUpdateBlog.addControl('_id', new FormControl(null, Validators.required))
+      this.creatUpdateBlog.removeControl('tags');
+      this.creatUpdateBlog.addControl('tags',new FormArray([]));
+      this.getBlogById(blogId)
+    }
   }
 
   getAllBlogCategories(){
@@ -50,8 +58,28 @@ export class AddEditComponent implements OnInit {
     })
   }
 
+  getBlogById(id: string){
+    this.blog.get(id)
+    .toPromise()
+    .then((res: any) => {
+      if(res['code'] === 200){
+        const result = res['result'];
+        if(result['tags'].length){
+          for(let i = 0; i < result['tags'].length;i++){
+            this.addTags()
+          }
+        }
+        this.creatUpdateBlog.reset(result);
+        this.creatUpdateBlog.get('tags')?.setValue(result['tags'])
+      }
+    })
+    .catch((error) => {
+      console.error(error)
+    })
+  }
+
   saveBlog(){
-    const formData = this.creatUpdateBlog.value;
+    const formData = this.creatUpdateBlog.getRawValue();
     if(this.creatUpdateBlog.invalid){
       return
     }

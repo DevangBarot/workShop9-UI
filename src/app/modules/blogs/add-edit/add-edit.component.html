@@ -20,7 +20,8 @@
     <div class="input-group" formArrayName="tags">
         <label for="tags">Tags</label>
         <div class="input-group mb-3" *ngFor="let tags of tagList['controls'];let tagIndex = index" [formGroupName]="tagIndex">
-            <input type="text" class="form-control rounded-0" id="tags" />
+            <input type="text" class="form-control rounded-0" id="tags" [formControl]="tagList['controls'][tagIndex]" /> 
+            <!-- [formControl]="tagList['controls'][tagIndex]" -->
             <span class="input-group-append">
                 <button type="button" class="btn btn-info btn-flat" *ngIf="tagIndex === tagList.length - 1"
                     (click)="addTags()">+</button>

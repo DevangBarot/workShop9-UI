@@ -39,7 +39,7 @@
                           <div class="d-flex justify-content-between action-icons">
                             <fa-icon [icon]="fontData.active" *ngIf="item.isActive"></fa-icon>
                             <fa-icon [icon]="fontData.inActive" *ngIf="!item.isActive"></fa-icon>
-                            <fa-icon [icon]="fontData.edit"></fa-icon>
+                            <fa-icon [icon]="fontData.edit" [routerLink]="ui.editBlog(item._id)"></fa-icon>
                             <fa-icon [icon]="fontData.delete"></fa-icon>
                           </div>
                         </td>
