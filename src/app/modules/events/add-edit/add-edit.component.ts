@@ -65,6 +65,8 @@ export class AddEditComponent implements OnInit {
   };
   uploadedSponsorDocument: any[] = [];
   uploadedDocument: any[] = [];
+  startTime: string | undefined;
+  endTime: string | undefined;
   get blogForm() {
     return new FormGroup({
       "title": new FormControl(null),
@@ -131,6 +133,8 @@ export class AddEditComponent implements OnInit {
             this.uploadedSponsorDocument.push(iterator)
           }
           this.createUpdateEvent.reset(result);
+          this.startTime = result['startDateTime'];
+          this.endTime = result['endDateTime'];
           this.createUpdateEvent.get('galleryVideos')?.setValue(result['galleryVideos']);
           this.createUpdateEvent.get('id')?.setValue(result['_id']);
         }
@@ -141,29 +145,30 @@ export class AddEditComponent implements OnInit {
   }
   saveEvent() {
     const formData = this.createUpdateEvent.value;
-    formData['sponsorsImages']=this.uploadedDocument.map(p=> p.base64);
-    formData['galleryImages']=this.uploadedSponsorDocument.map(p=> p.base64);
+    formData['sponsorsImages'] = this.uploadedDocument.map(p => p.uploadLink);
+    formData['galleryImages'] = this.uploadedSponsorDocument.map(p => p.uploadLink);
+    console.log(formData);
     if (this.createUpdateEvent.invalid) {
       return
     }
-    if(this.eventId){
+    if (this.eventId) {
       this.eventsService.update(formData)
-      .toPromise()
-      .then((res) => {
-        this.router.navigate([this.ui.events()])
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-    }else{
+        .toPromise()
+        .then((res) => {
+          this.router.navigate([this.ui.events()])
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    } else {
       this.eventsService.add(formData)
-      .toPromise()
-      .then((res) => {
-        this.router.navigate([this.ui.events()])
-      })
-      .catch((error) => {
-        console.error(error)
-      })
+        .toPromise()
+        .then((res) => {
+          this.router.navigate([this.ui.events()])
+        })
+        .catch((error) => {
+          console.error(error)
+        })
     }
   }
   resetEvent() {
@@ -196,12 +201,12 @@ export class AddEditComponent implements OnInit {
           return;
         } else {
           const filePreview = 'data:' + file.type + ';base64,' + (<string>reader.result).split(',')[1];
-          if(t==='sponsorDoc'){
-            this.uploadedSponsorDocument.push({ uploadLink: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type});
-          }else{
+          if (t === 'sponsorDoc') {
+            this.uploadedSponsorDocument.push({ uploadLink: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type });
+          } else {
             this.uploadedDocument.push({ uploadLink: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type });
           }
-          
+
         }
       }
     };
@@ -209,7 +214,7 @@ export class AddEditComponent implements OnInit {
   get galleryVideosList() {
     return (this.createUpdateEvent.get('galleryVideos') as FormArray);
   }
-  
+
   addTags() {
     let tagListControl = this.galleryVideosList;
     tagListControl.push(new FormControl(null));

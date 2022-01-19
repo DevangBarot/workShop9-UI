@@ -15,12 +15,12 @@
     </div>
     <div class="form-group">
         <label for="description">Start Date & Time</label>
-        <date-time [systemConf]="startTimeConfig" (timeUtc)="onTimeSelection($event, 'startDateTime')">
+        <date-time [dateObject]="startTime" [timeObject]="startTime" [systemConf]="startTimeConfig" (timeUtc)="onTimeSelection($event, 'startDateTime')">
         </date-time>
     </div>
     <div class="form-group">
         <label for="description">End Date & Time</label>
-        <date-time [systemConf]="startTimeConfig" (timeUtc)="onTimeSelection($event, 'endDateTime')">
+        <date-time [dateObject]="endTime" [timeObject]="endTime" [systemConf]="startTimeConfig" (timeUtc)="onTimeSelection($event, 'endDateTime')">
         </date-time>
     </div>
     <div>

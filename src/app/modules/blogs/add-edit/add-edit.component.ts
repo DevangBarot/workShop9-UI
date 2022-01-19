@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { BlogsCategoryService } from 'src/app/shared/services/blogs-category.service';
 import { BlogsService } from 'src/app/shared/services/blogs.service';
 import { UiService } from 'src/app/shared/services/ui.service';
 
@@ -23,7 +24,7 @@ export class AddEditComponent implements OnInit {
       "tags": new FormArray([new FormControl('')])
     })
   }
-  constructor(private blog: BlogsService,
+  constructor(private blog: BlogsService, private blogCategory:BlogsCategoryService,
     private route: ActivatedRoute,
     private ui: UiService, private router: Router) {
     this.creatUpdateBlog = this.blogForm;
@@ -45,7 +46,7 @@ export class AddEditComponent implements OnInit {
   }
 
   getAllBlogCategories() {
-    this.blog.getAllBlogCategories()
+    this.blogCategory.listActive()
       .toPromise()
       .then((res: any) => {
         if (res['code'] === 200) {

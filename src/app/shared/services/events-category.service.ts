@@ -5,7 +5,7 @@ import { SharedService } from './shared.service';
   providedIn: 'root'
 })
 export class EventsCategoryService {
-  apiUrl = 'blog/category/';
+  apiUrl = 'event/category/';
   userId = '';
   constructor(
     private http: HttpClient,
