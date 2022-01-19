@@ -1,13 +1,23 @@
+<div class="d-flex justify-content-right flex-wrap">
+    <button class="btn btn-primary mr-10" type="button" (click)="back()">Back</button>
+</div>
 <form [formGroup]="createUpdateEvent" autocomplete="off">
     <div class="form-group">
         <label for="title">Event Name</label>
         <input type="text" class="form-control" formControlName="title" id="title">
     </div>
-    <div class="form-group">
+    <div class="form-group input-group">
         <label for="categoryId">Event category</label>
-        <select class="form-control" formControlName="categoryId" id="categoryId">
-            <option *ngFor="let item of allEventCategories" [value]="item._id">{{item.title}}</option>
-        </select>
+        <div class="input-group mb-3">
+            <select class="form-control" formControlName="categoryId" id="categoryId">
+                <option *ngFor="let item of allEventCategories" [value]="item._id">{{item.title}}</option>
+            </select>
+            <span class="input-group-append">
+                <button type="button" class="btn btn-info btn-flat" (click)="open(contentCategory)">
+                    <fa-icon [icon]="fontData.add"></fa-icon>
+                </button>
+            </span>
+        </div>
     </div>
     <div class="form-group">
         <label for="description">Description</label>
@@ -15,12 +25,14 @@
     </div>
     <div class="form-group">
         <label for="description">Start Date & Time</label>
-        <date-time [dateObject]="startTime" [timeObject]="startTime" [systemConf]="startTimeConfig" (timeUtc)="onTimeSelection($event, 'startDateTime')">
+        <date-time [dateObject]="startTime" [timeObject]="startTime" [systemConf]="startTimeConfig"
+            (timeUtc)="onTimeSelection($event, 'startDateTime')">
         </date-time>
     </div>
     <div class="form-group">
         <label for="description">End Date & Time</label>
-        <date-time [dateObject]="endTime" [timeObject]="endTime" [systemConf]="startTimeConfig" (timeUtc)="onTimeSelection($event, 'endDateTime')">
+        <date-time [dateObject]="endTime" [timeObject]="endTime" [systemConf]="startTimeConfig"
+            (timeUtc)="onTimeSelection($event, 'endDateTime')">
         </date-time>
     </div>
     <div>
@@ -59,16 +71,44 @@
     </div>
     <div class="input-group" formArrayName="galleryVideos">
         <label for="tags">Upload Event videos</label>
-        <div class="input-group mb-3" *ngFor="let tags of galleryVideosList['controls'];let tagIndex = index" [formGroupName]="tagIndex">
-            <input type="text" class="form-control rounded-0" id="tags" [formControl]="galleryVideosList['controls'][tagIndex]" /> 
+        <div class="input-group mb-3" *ngFor="let tags of galleryVideosList['controls'];let tagIndex = index"
+            [formGroupName]="tagIndex">
+            <input type="text" class="form-control rounded-0" id="tags"
+                [formControl]="galleryVideosList['controls'][tagIndex]" />
             <span class="input-group-append">
                 <button type="button" class="btn btn-info btn-flat" *ngIf="tagIndex === galleryVideosList.length - 1"
-                    (click)="addTags()">+</button>
+                    (click)="addTags()">
+                    <fa-icon [icon]="fontData.add"></fa-icon>
+                </button>
                 <button type="button" class="btn btn-info btn-flat" *ngIf="galleryVideosList.length - 1 !== 0"
-                    (click)="removeTags(tagIndex)">-</button>
+                    (click)="removeTags(tagIndex)">
+                    <fa-icon [icon]="fontData.minus"></fa-icon>
+                </button>
             </span>
         </div>
     </div>
-    <button class="btn btn-primary" type="button" (click)="resetEvent()">Clear</button>
-    <button class="btn btn-primary" type="submit" (click)="saveEvent()">Save</button>
+    <div class="d-flex justify-content-right flex-wrap">
+        <button class="btn btn-outline-secondary mr-10" type="button" (click)="resetEvent()">Reset</button>
+        <button class="btn btn-primary" type="submit" (click)="saveEvent()">Save</button>
+    </div>
 </form>
+
+<ng-template #contentCategory let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Add Category</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="createEventCategory" autocomplete="off">
+            <div class="form-group">
+                <label for="postTitle">Title</label>
+                <input type="text" class="form-control" id="postTitle" formControlName="title">
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" (click)="saveEventCategory()">Save</button>
+    </div>
+</ng-template>

@@ -1,16 +1,26 @@
+<div class="d-flex justify-content-right flex-wrap">
+    <button class="btn btn-primary mr-10" type="button" (click)="back()">Back</button>
+</div>
 <form [formGroup]="creatUpdateBlog" (submit)="saveBlog()" autocomplete="off">
     <div class="form-group">
         <label for="postTitle">Post Title</label>
         <input type="text" class="form-control" id="postTitle" formControlName="title">
     </div>
-    <div class="form-group">
+    <div class="input-group">
         <label for="postCategory">Post Content</label>
-        <select formControlName="categoryId" id="postCategory" name="customerType" class="form-control">
-            <option [ngValue]="null" disabled>Select</option>
-            <option [ngValue]="category['_id']" *ngFor="let category of allBlogCategories">
-                {{category['title']}}
-            </option>
-        </select>
+        <div class="input-group mb-3">
+            <select formControlName="categoryId" id="postCategory" name="customerType" class="form-control">
+                <option [ngValue]="null" disabled>Select</option>
+                <option [ngValue]="category['_id']" *ngFor="let category of allBlogCategories">
+                    {{category['title']}}
+                </option>
+            </select>
+            <span class="input-group-append">
+                <button type="button" class="btn btn-info btn-flat" (click)="open(contentCategory)">
+                    <fa-icon [icon]="fontData.add"></fa-icon>
+                </button>
+            </span>
+        </div>
     </div>
     <div class="form-group">
         <label for="postContent">Content</label>
@@ -19,17 +29,43 @@
 
     <div class="input-group" formArrayName="tags">
         <label for="tags">Tags</label>
-        <div class="input-group mb-3" *ngFor="let tags of tagList['controls'];let tagIndex = index" [formGroupName]="tagIndex">
-            <input type="text" class="form-control rounded-0" id="tags" [formControl]="tagList['controls'][tagIndex]" /> 
+        <div class="input-group mb-3" *ngFor="let tags of tagList['controls'];let tagIndex = index"
+            [formGroupName]="tagIndex">
+            <input type="text" class="form-control rounded-0" id="tags" [formControl]="tagList['controls'][tagIndex]" />
             <span class="input-group-append">
                 <button type="button" class="btn btn-info btn-flat" *ngIf="tagIndex === tagList.length - 1"
-                    (click)="addTags()">+</button>
+                    (click)="addTags()">
+                    <fa-icon [icon]="fontData.add"></fa-icon>
+                </button>
                 <button type="button" class="btn btn-info btn-flat" *ngIf="tagList.length - 1 !== 0"
-                    (click)="removeTags(tagIndex)">-</button>
+                    (click)="removeTags(tagIndex)">
+                    <fa-icon [icon]="fontData.minus"></fa-icon>
+                </button>
             </span>
         </div>
     </div>
-
-    <button class="btn btn-primary" type="button" (click)="resetBlog()">Clear</button>
-    <button class="btn btn-primary" type="submit">Save</button>
+    <div class="d-flex justify-content-right flex-wrap">
+        <button class="btn btn-outline-secondary mr-10" type="button" (click)="resetBlog()">Reset</button>
+        <button class="btn btn-primary" type="submit">Save</button>
+    </div>
 </form>
+
+<ng-template #contentCategory let-modal>
+    <div class="modal-header">
+        <h4 class="modal-title" id="modal-basic-title">Add Category</h4>
+        <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <form [formGroup]="createBlogCategory" autocomplete="off">
+            <div class="form-group">
+                <label for="postTitle">Title</label>
+                <input type="text" class="form-control" id="postTitle" formControlName="title">
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-outline-dark" (click)="saveBlogCategory()">Save</button>
+    </div>
+</ng-template>

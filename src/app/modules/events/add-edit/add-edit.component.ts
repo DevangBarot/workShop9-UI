@@ -7,6 +7,8 @@ import { EventsCategoryService } from 'src/app/shared/services/events-category.s
 import { EventsService } from 'src/app/shared/services/events.service';
 import { UiService } from 'src/app/shared/services/ui.service';
 import * as _ from 'lodash';
+import { faMinus, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 @Component({
   selector: 'app-add-edit',
   templateUrl: './add-edit.component.html',
@@ -18,6 +20,7 @@ export class AddEditComponent implements OnInit {
   supportedFileTypes = ['image/jpg', 'image/jpeg', 'image/png'];
   allEventCategories: any[] = [];
   createUpdateEvent: FormGroup = new FormGroup({});
+  createEventCategory: FormGroup = new FormGroup({});
   sponsorDoc: FormControl = new FormControl();
   mediaDoc: FormControl = new FormControl();
   editorConfig: AngularEditorConfig = {
@@ -80,15 +83,23 @@ export class AddEditComponent implements OnInit {
       "galleryVideos": new FormArray([new FormControl('')])
     })
   }
+  fontData = { add: faPlusSquare, minus: faMinus };
+  get eventCategoryForm() {
+    return new FormGroup({
+      "title": new FormControl(null, [Validators.required])
+    })
+  }
   constructor(
     private eventsService: EventsService,
     private eventsCategoryService: EventsCategoryService,
     private router: Router,
+    private modalService: NgbModal,
     private route: ActivatedRoute,
-    private ui: UiService,
+    public ui: UiService,
     private toaster: ToastrService
   ) {
     this.createUpdateEvent = this.blogForm;
+    this.createEventCategory = this.eventCategoryForm;
   }
 
   ngOnInit(): void {
@@ -154,25 +165,34 @@ export class AddEditComponent implements OnInit {
     if (this.eventId) {
       this.eventsService.update(formData)
         .toPromise()
-        .then((res) => {
+        .then((res: any) => {
+          this.toaster.success('Success', res['message']);
           this.router.navigate([this.ui.events()])
         })
         .catch((error) => {
-          console.error(error)
+          this.toaster.error('Error', error.error.message);
         })
     } else {
       this.eventsService.add(formData)
         .toPromise()
-        .then((res) => {
+        .then((res: any) => {
+          this.toaster.success('Success', res['message']);
           this.router.navigate([this.ui.events()])
         })
         .catch((error) => {
-          console.error(error)
+          this.toaster.error('Error', error.error.message);
         })
     }
   }
   resetEvent() {
-    this.createUpdateEvent = this.blogForm;
+    if (this.eventId) {
+      this.createUpdateEvent.addControl('id', new FormControl(null, Validators.required))
+      this.createUpdateEvent.removeControl('galleryVideos');
+      this.createUpdateEvent.addControl('galleryVideos', new FormArray([]));
+      this.getEventById(this.eventId)
+    } else {
+      this.createUpdateEvent = this.blogForm;
+    }
   }
   async uploadDocument(event: any, data: any) {
     if (data === 'sponsorDoc') {
@@ -229,5 +249,37 @@ export class AddEditComponent implements OnInit {
   }
   onTimeSelection(utcTime: string, param: string): void {
     this.createUpdateEvent.get(param)?.setValue(utcTime);
+  }
+  back() {
+    this.router.navigate([this.ui.events()])
+  }
+  open(content: any) {
+    this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' }).result.then((result) => {
+      this.createEventCategory = this.eventCategoryForm;
+    }, (reason) => {
+      close();
+    });
+  }
+  close() {
+    this.modalService.dismissAll();
+    this.createEventCategory.reset();
+  }
+  saveEventCategory() {
+    const formData = this.createEventCategory.getRawValue();
+    formData['description'] = formData['title'];
+    formData['colorCode'] = '#ffff';
+    if (this.createEventCategory.invalid) {
+      return
+    }
+    this.eventsCategoryService.add(formData)
+      .toPromise()
+      .then((res: any) => {
+        this.toaster.success('Success', res['message']);
+        this.close();
+        this.getAllEventCategories();
+      })
+      .catch((error) => {
+        this.toaster.error('Error', error.error.message);
+      })
   }
 }

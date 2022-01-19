@@ -4,7 +4,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { BlogsCategoryService } from 'src/app/shared/services/blogs-category.service';
 import { BlogsService } from 'src/app/shared/services/blogs.service';
 import { UiService } from 'src/app/shared/services/ui.service';
-
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { faMinus, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-add-edit',
   templateUrl: './add-edit.component.html',
@@ -15,6 +17,7 @@ export class AddEditComponent implements OnInit {
   blogId: any;
   allBlogCategories: any[] = [];
   creatUpdateBlog: FormGroup;
+  createBlogCategory: FormGroup;
   get blogForm() {
     return new FormGroup({
       "title": new FormControl(null),
@@ -24,10 +27,19 @@ export class AddEditComponent implements OnInit {
       "tags": new FormArray([new FormControl('')])
     })
   }
-  constructor(private blog: BlogsService, private blogCategory:BlogsCategoryService,
+  fontData = { add: faPlusSquare, minus: faMinus };
+  get blogCategoryForm() {
+    return new FormGroup({
+      "title": new FormControl(null,[Validators.required])
+    })
+  }
+  constructor(private blog: BlogsService, private blogCategory: BlogsCategoryService,
     private route: ActivatedRoute,
-    private ui: UiService, private router: Router) {
+    private modalService: NgbModal,
+    private ui: UiService, private router: Router,
+    private toaster: ToastrService) {
     this.creatUpdateBlog = this.blogForm;
+    this.createBlogCategory =this.blogCategoryForm;
   }
 
   get tagList() {
@@ -85,30 +97,39 @@ export class AddEditComponent implements OnInit {
     if (this.creatUpdateBlog.invalid) {
       return
     }
-    if(this.blogId){
+    if (this.blogId) {
       this.blog.update(formData)
-      .toPromise()
-      .then((res) => {
-        this.router.navigate([this.ui.blogs()])
-      })
-      .catch((error) => {
-        console.error(error)
-      })
-    }else{
+        .toPromise()
+        .then((res:any) => {
+          this.toaster.success('Success', res['message'])
+          this.router.navigate([this.ui.blogs()])
+        })
+        .catch((error) => {
+          this.toaster.error('Error', error.error.message)
+        })
+    } else {
       this.blog.add(formData)
-      .toPromise()
-      .then((res) => {
-        this.router.navigate([this.ui.blogs()])
-      })
-      .catch((error) => {
-        console.error(error)
-      })
+        .toPromise()
+        .then((res:any) => {
+          this.toaster.success('Success', res['message'])
+          this.router.navigate([this.ui.blogs()])
+        })
+        .catch((error) => {
+          this.toaster.error('Error', error.error.message)
+        })
     }
-     
+
   }
 
   resetBlog() {
-    this.creatUpdateBlog = this.blogForm;
+    if (this.blogId) {
+      this.creatUpdateBlog.addControl('id', new FormControl(null, Validators.required))
+      this.creatUpdateBlog.removeControl('tags');
+      this.creatUpdateBlog.addControl('tags', new FormArray([]));
+      this.getBlogById(this.blogId)
+    }else{
+      this.creatUpdateBlog = this.blogForm;
+    }
   }
 
   addTags() {
@@ -123,5 +144,35 @@ export class AddEditComponent implements OnInit {
       this.addTags();
     }
   }
-
+  back(){
+    this.router.navigate([this.ui.blogs()])
+  }
+  open(content: any) {
+    this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' }).result.then((result) => {
+      this.createBlogCategory = this.blogCategoryForm;
+    }, (reason) => {
+      close();
+    });
+  }
+  close() {
+    this.modalService.dismissAll();
+    this.createBlogCategory.reset();
+  }
+  saveBlogCategory() {
+    const formData = this.createBlogCategory.getRawValue();
+    formData['description']=formData['title'];
+    if (this.createBlogCategory.invalid) {
+      return
+    }
+    this.blogCategory.add(formData)
+    .toPromise()
+    .then((res:any) => {
+      this.toaster.success('Success', res['message'])
+      this.close();
+      this.getAllBlogCategories();
+    })
+    .catch((error) => {
+      this.toaster.error('Error', error.error.message)
+    })
+  }
 }
