@@ -7,8 +7,10 @@ import { EventsCategoryService } from 'src/app/shared/services/events-category.s
 import { EventsService } from 'src/app/shared/services/events.service';
 import { UiService } from 'src/app/shared/services/ui.service';
 import * as _ from 'lodash';
-import { faMinus, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
+import { faMinus, faPlusSquare, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { SharedService } from 'src/app/shared/services/shared.service';
+import { indexOf } from 'lodash';
 @Component({
   selector: 'app-add-edit',
   templateUrl: './add-edit.component.html',
@@ -68,6 +70,8 @@ export class AddEditComponent implements OnInit {
   };
   uploadedSponsorDocument: any[] = [];
   uploadedDocument: any[] = [];
+  deleteSponsorDocument: any[] = [];
+  deleteDocument: any[] = [];
   startTime: string | undefined;
   endTime: string | undefined;
   get blogForm() {
@@ -83,7 +87,7 @@ export class AddEditComponent implements OnInit {
       "galleryVideos": new FormArray([new FormControl('')])
     })
   }
-  fontData = { add: faPlusSquare, minus: faMinus };
+  fontData = { add: faPlusSquare, minus: faMinus, delete: faTrashAlt };
   get eventCategoryForm() {
     return new FormGroup({
       "title": new FormControl(null, [Validators.required])
@@ -96,7 +100,8 @@ export class AddEditComponent implements OnInit {
     private modalService: NgbModal,
     private route: ActivatedRoute,
     public ui: UiService,
-    private toaster: ToastrService
+    private toaster: ToastrService,
+    private sharedService: SharedService
   ) {
     this.createUpdateEvent = this.blogForm;
     this.createEventCategory = this.eventCategoryForm;
@@ -114,19 +119,23 @@ export class AddEditComponent implements OnInit {
   }
 
   getAllEventCategories() {
+    this.sharedService.changeLoaderStatus(true);
     this.eventsCategoryService.listActive()
       .toPromise()
       .then((res: any) => {
         if (res['code'] === 200) {
           const result = res['result']?.data;
           this.allEventCategories = result;
+          this.sharedService.changeLoaderStatus(false);
         }
       })
       .catch((error) => {
         console.error(error)
+        this.sharedService.changeLoaderStatus(false);
       })
   }
   getEventById(id: string) {
+    this.sharedService.changeLoaderStatus(true);
     this.eventsService.get(id)
       .toPromise()
       .then((res: any) => {
@@ -138,9 +147,11 @@ export class AddEditComponent implements OnInit {
             }
           }
           for (const iterator of result['galleryImages']) {
+            iterator['status'] = 'old';
             this.uploadedDocument.push(iterator)
           }
           for (const iterator of result['sponsorsImages']) {
+            iterator['status'] = 'old';
             this.uploadedSponsorDocument.push(iterator)
           }
           this.createUpdateEvent.reset(result);
@@ -149,38 +160,47 @@ export class AddEditComponent implements OnInit {
           this.createUpdateEvent.get('galleryVideos')?.setValue(result['galleryVideos']);
           this.createUpdateEvent.get('id')?.setValue(result['_id']);
         }
+        this.sharedService.changeLoaderStatus(false);
       })
       .catch((error) => {
-        console.error(error)
+        this.sharedService.changeLoaderStatus(false);
+        console.error(error);
+        this.back();
       })
   }
   saveEvent() {
     const formData = this.createUpdateEvent.value;
-    formData['sponsorsImages'] = this.uploadedDocument.map(p => p.uploadLink);
-    formData['galleryImages'] = this.uploadedSponsorDocument.map(p => p.uploadLink);
-    console.log(formData);
+    formData['sponsorsImages'] = this.uploadedDocument;
+    formData['galleryImages'] = this.uploadedSponsorDocument;
+    formData['sponsorsDeleteImages'] = this.deleteSponsorDocument;
+    formData['galleryDeleteImages'] = this.deleteDocument;
     if (this.createUpdateEvent.invalid) {
       return
     }
+    this.sharedService.changeLoaderStatus(true);
     if (this.eventId) {
       this.eventsService.update(formData)
         .toPromise()
         .then((res: any) => {
           this.toaster.success('Success', res['message']);
-          this.router.navigate([this.ui.events()])
+          this.router.navigate([this.ui.events()]);
+          this.sharedService.changeLoaderStatus(false);
         })
         .catch((error) => {
           this.toaster.error('Error', error.error.message);
+          this.sharedService.changeLoaderStatus(false);
         })
     } else {
       this.eventsService.add(formData)
         .toPromise()
         .then((res: any) => {
           this.toaster.success('Success', res['message']);
-          this.router.navigate([this.ui.events()])
+          this.router.navigate([this.ui.events()]);
+          this.sharedService.changeLoaderStatus(false);
         })
         .catch((error) => {
           this.toaster.error('Error', error.error.message);
+          this.sharedService.changeLoaderStatus(false);
         })
     }
   }
@@ -222,9 +242,9 @@ export class AddEditComponent implements OnInit {
         } else {
           const filePreview = 'data:' + file.type + ';base64,' + (<string>reader.result).split(',')[1];
           if (t === 'sponsorDoc') {
-            this.uploadedSponsorDocument.push({ uploadLink: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type });
+            this.uploadedSponsorDocument.push({ uploadLink: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type, status: 'add' });
           } else {
-            this.uploadedDocument.push({ uploadLink: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type });
+            this.uploadedDocument.push({ uploadLink: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type, status: 'add' });
           }
 
         }
@@ -271,15 +291,42 @@ export class AddEditComponent implements OnInit {
     if (this.createEventCategory.invalid) {
       return
     }
+    this.sharedService.changeLoaderStatus(true);
     this.eventsCategoryService.add(formData)
       .toPromise()
       .then((res: any) => {
         this.toaster.success('Success', res['message']);
         this.close();
+        this.sharedService.changeLoaderStatus(false);
         this.getAllEventCategories();
       })
       .catch((error) => {
+        this.sharedService.changeLoaderStatus(false);
         this.toaster.error('Error', error.error.message);
       })
+  }
+  removeImage(data: any, type: any) {
+    let filterData = [];
+    if (type === 'sponsorDoc') {
+      filterData = this.uploadedSponsorDocument.filter(p => p.uploadLink === data.uploadLink);
+    } else {
+      filterData = this.uploadedDocument.filter(p => p.uploadLink === data.uploadLink);
+    }
+    if (filterData.length > 0) {
+      if (type === 'sponsorDoc') {
+        if (data['status'] === 'old') {
+          filterData[0]['status'] = 'delete';
+          this.deleteSponsorDocument.push(filterData[0]);
+        }
+        this.uploadedSponsorDocument.splice(this.uploadedSponsorDocument.indexOf(filterData[0]),1);
+      } else {
+        if (data['status'] === 'old') {
+          filterData[0]['status'] = 'delete';
+          this.deleteDocument.push(filterData[0]);
+        }
+        this.uploadedDocument.splice(this.uploadedDocument.indexOf(filterData[0]),1);
+      }
+      
+    }
   }
 }

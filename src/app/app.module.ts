@@ -22,6 +22,7 @@ import { SharedModule } from './shared/shared.module';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { HttpInterceptorService } from './shared/interceptors/http.interceptor';
 import { ToastrModule } from 'ngx-toastr';
+import { NgxLoadingModule } from 'ngx-loading';
 
 export function momentAdapterFactory() {
   return adapterFactory(moment);
@@ -50,6 +51,7 @@ export function momentAdapterFactory() {
     EventsModule,
     SharedModule,
     ToastrModule.forRoot(),
+    NgxLoadingModule.forRoot({})
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: HttpInterceptorService, multi: true }

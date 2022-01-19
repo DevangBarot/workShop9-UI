@@ -7,6 +7,7 @@ import { UiService } from 'src/app/shared/services/ui.service';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { faMinus, faPlusSquare } from '@fortawesome/free-solid-svg-icons';
 import { ToastrService } from 'ngx-toastr';
+import { SharedService } from 'src/app/shared/services/shared.service';
 @Component({
   selector: 'app-add-edit',
   templateUrl: './add-edit.component.html',
@@ -37,7 +38,8 @@ export class AddEditComponent implements OnInit {
     private route: ActivatedRoute,
     private modalService: NgbModal,
     private ui: UiService, private router: Router,
-    private toaster: ToastrService) {
+    private toaster: ToastrService,
+    private sharedService: SharedService) {
     this.creatUpdateBlog = this.blogForm;
     this.createBlogCategory =this.blogCategoryForm;
   }
@@ -58,20 +60,24 @@ export class AddEditComponent implements OnInit {
   }
 
   getAllBlogCategories() {
+    this.sharedService.changeLoaderStatus(true);
     this.blogCategory.listActive()
       .toPromise()
       .then((res: any) => {
         if (res['code'] === 200) {
           const result = res['result']?.data;
           this.allBlogCategories = result;
+          this.sharedService.changeLoaderStatus(false);
         }
       })
       .catch((error) => {
         console.error(error)
+        this.sharedService.changeLoaderStatus(false);
       })
   }
 
   getBlogById(id: string) {
+    this.sharedService.changeLoaderStatus(true);
     this.blog.get(id)
       .toPromise()
       .then((res: any) => {
@@ -85,36 +91,45 @@ export class AddEditComponent implements OnInit {
           this.creatUpdateBlog.reset(result);
           this.creatUpdateBlog.get('tags')?.setValue(result['tags'])
           this.creatUpdateBlog.get('id')?.setValue(result['_id'])
+          this.sharedService.changeLoaderStatus(false);
         }
       })
       .catch((error) => {
         console.error(error)
+        this.back();
+        this.sharedService.changeLoaderStatus(false);
       })
   }
 
   saveBlog() {
+    
     const formData = this.creatUpdateBlog.getRawValue();
     if (this.creatUpdateBlog.invalid) {
       return
     }
+    this.sharedService.changeLoaderStatus(true);
     if (this.blogId) {
       this.blog.update(formData)
         .toPromise()
         .then((res:any) => {
-          this.toaster.success('Success', res['message'])
-          this.router.navigate([this.ui.blogs()])
+          this.toaster.success('Success', res['message']);
+          this.router.navigate([this.ui.blogs()]);
+          this.sharedService.changeLoaderStatus(false);
         })
         .catch((error) => {
+          this.sharedService.changeLoaderStatus(false);
           this.toaster.error('Error', error.error.message)
         })
     } else {
       this.blog.add(formData)
         .toPromise()
         .then((res:any) => {
-          this.toaster.success('Success', res['message'])
-          this.router.navigate([this.ui.blogs()])
+          this.toaster.success('Success', res['message']);
+          this.router.navigate([this.ui.blogs()]);
+          this.sharedService.changeLoaderStatus(false);
         })
         .catch((error) => {
+          this.sharedService.changeLoaderStatus(false);
           this.toaster.error('Error', error.error.message)
         })
     }
@@ -164,14 +179,17 @@ export class AddEditComponent implements OnInit {
     if (this.createBlogCategory.invalid) {
       return
     }
+    this.sharedService.changeLoaderStatus(true);
     this.blogCategory.add(formData)
     .toPromise()
     .then((res:any) => {
       this.toaster.success('Success', res['message'])
       this.close();
       this.getAllBlogCategories();
+      this.sharedService.changeLoaderStatus(false);
     })
     .catch((error) => {
+      this.sharedService.changeLoaderStatus(false);
       this.toaster.error('Error', error.error.message)
     })
   }

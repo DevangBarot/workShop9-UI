@@ -23,7 +23,7 @@ export class AuthService {
     }
     refreshToken() {
       const refToken = this.storageService.getItem('refreshToken') ? this.storageService.getItem('refreshToken') : null;
-      const url = this.apiUrl + 'refresh-token/' + refToken;
+      const url = this.apiUrl + 'refreshToken/' + refToken;
       if (refToken !== null && refToken !== undefined) {
         return this.http.get(url)
           .pipe(map((res:any) => {

@@ -25,7 +25,7 @@ export class ListComponent implements OnInit {
   }
 
   getList() {
-    this.sharedService.changeLoaderStatus(true)
+    this.sharedService.changeLoaderStatus(true);
     this.blogsService.list(this.paginationObject).subscribe((res: any) => {
       if (res['code'] === 200) {
         this.listData = res['result']['data']

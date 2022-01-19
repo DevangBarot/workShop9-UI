@@ -36,6 +36,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "moment-timezone": "^0.5.34",
+    "ngx-loading": "^8.0.0",
     "ngx-pagination": "^5.1.1",
     "ngx-toastr": "11.3.3",
     "popper.js": "^1.16.1",

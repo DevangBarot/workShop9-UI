@@ -53,6 +53,7 @@
             <div class="product-image-thumb">
                 <img [src]="item['uploadLink']" class="img-fluid" alt="{{item['fileName']}}">
             </div>
+            <a href="javascript:" (click)="removeImage(item,'sponsorDoc')"><fa-icon [icon]="fontData.delete"></fa-icon></a>
         </div>
     </div>
     <div class="form-group">
@@ -67,6 +68,7 @@
             <div class="product-image-thumb">
                 <img [src]="item['uploadLink']" class="img-fluid" alt="{{item['fileName']}}">
             </div>
+            <a href="javascript:" (click)="removeImage(item,'mediaDoc')"><fa-icon [icon]="fontData.delete"></fa-icon></a>
         </div>
     </div>
     <div class="input-group" formArrayName="galleryVideos">
