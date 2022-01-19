@@ -65,7 +65,8 @@ export function momentAdapterFactory() {
     NgxPaginationModule,
     MomentDatePipe,
     FontAwesomeModule,
-    AngularEditorModule
+    AngularEditorModule,
+    DateTimeComponent
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })

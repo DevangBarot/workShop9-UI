@@ -25,4 +25,8 @@ export class SharedService {
   changeLoaderStatus(status: boolean) {
     this.loaderSource.next(status);
   }
+  getTimeZone(): string {
+    return 'America/Toronto';
+  }
+
 }

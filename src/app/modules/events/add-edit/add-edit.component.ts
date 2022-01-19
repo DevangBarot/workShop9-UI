@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AngularEditorConfig } from '@kolkov/angular-editor';
 import { ToastrService } from 'ngx-toastr';
 import { EventsCategoryService } from 'src/app/shared/services/events-category.service';
@@ -13,6 +13,8 @@ import * as _ from 'lodash';
   styleUrls: ['./add-edit.component.scss']
 })
 export class AddEditComponent implements OnInit {
+  eventId: any;
+  public startTimeConfig = { dateLabel: null, timeLabel: 'Start of Day', visible: 'BOTH', isRequired: true };
   supportedFileTypes = ['image/jpg', 'image/jpeg', 'image/png'];
   allEventCategories: any[] = [];
   createUpdateEvent: FormGroup = new FormGroup({});
@@ -61,6 +63,7 @@ export class AddEditComponent implements OnInit {
       ['fontSize']
     ]
   };
+  uploadedSponsorDocument: any[] = [];
   uploadedDocument: any[] = [];
   get blogForm() {
     return new FormGroup({
@@ -79,6 +82,7 @@ export class AddEditComponent implements OnInit {
     private eventsService: EventsService,
     private eventsCategoryService: EventsCategoryService,
     private router: Router,
+    private route: ActivatedRoute,
     private ui: UiService,
     private toaster: ToastrService
   ) {
@@ -87,6 +91,13 @@ export class AddEditComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllEventCategories();
+    this.eventId = this.route.snapshot.params?.id;
+    if (this.eventId) {
+      this.createUpdateEvent.addControl('id', new FormControl(null, Validators.required))
+      this.createUpdateEvent.removeControl('galleryVideos');
+      this.createUpdateEvent.addControl('galleryVideos', new FormArray([]));
+      this.getEventById(this.eventId)
+    }
   }
 
   getAllEventCategories() {
@@ -102,22 +113,58 @@ export class AddEditComponent implements OnInit {
         console.error(error)
       })
   }
+  getEventById(id: string) {
+    this.eventsService.get(id)
+      .toPromise()
+      .then((res: any) => {
+        if (res['code'] === 200) {
+          const result = res['result'];
+          if (result['galleryVideos'].length) {
+            for (let i = 0; i < result['galleryVideos'].length; i++) {
+              this.addTags()
+            }
+          }
+          for (const iterator of result['galleryImages']) {
+            this.uploadedDocument.push(iterator)
+          }
+          for (const iterator of result['sponsorsImages']) {
+            this.uploadedSponsorDocument.push(iterator)
+          }
+          this.createUpdateEvent.reset(result);
+          this.createUpdateEvent.get('galleryVideos')?.setValue(result['galleryVideos']);
+          this.createUpdateEvent.get('id')?.setValue(result['_id']);
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
   saveEvent() {
     const formData = this.createUpdateEvent.value;
-    formData['sponsorsImages']=this.uploadedDocument.filter(p=> p.for==='sponsorDoc').map(p=> p.base64);
-    formData['galleryImages']=this.uploadedDocument.filter(p=> p.for==='mediaDoc').map(p=> p.base64);
-    console.log(formData)
+    formData['sponsorsImages']=this.uploadedDocument.map(p=> p.base64);
+    formData['galleryImages']=this.uploadedSponsorDocument.map(p=> p.base64);
     if (this.createUpdateEvent.invalid) {
       return
     }
-    // this.eventsService.add(formData)
-    //   .toPromise()
-    //   .then((res) => {
-    //     this.router.navigate([this.ui.blogs()])
-    //   })
-    //   .catch((error) => {
-    //     console.error(error)
-    //   })
+    if(this.eventId){
+      this.eventsService.update(formData)
+      .toPromise()
+      .then((res) => {
+        this.router.navigate([this.ui.events()])
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    }else{
+      this.eventsService.add(formData)
+      .toPromise()
+      .then((res) => {
+        this.router.navigate([this.ui.events()])
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    }
   }
   resetEvent() {
     this.createUpdateEvent = this.blogForm;
@@ -149,24 +196,33 @@ export class AddEditComponent implements OnInit {
           return;
         } else {
           const filePreview = 'data:' + file.type + ';base64,' + (<string>reader.result).split(',')[1];
-          this.uploadedDocument.push({ base64: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type, for: t });
+          if(t==='sponsorDoc'){
+            this.uploadedSponsorDocument.push({ uploadLink: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type});
+          }else{
+            this.uploadedDocument.push({ uploadLink: filePreview, fileName: file.name, fileSize: file.size, fileType: file.type });
+          }
+          
         }
       }
     };
   }
-  get galleryVideos() {
+  get galleryVideosList() {
     return (this.createUpdateEvent.get('galleryVideos') as FormArray);
   }
+  
   addTags() {
-    let tagListControl = this.galleryVideos;
+    let tagListControl = this.galleryVideosList;
     tagListControl.push(new FormControl(null));
   }
 
   removeTags(index: number) {
-    let tagListControl = this.galleryVideos;
+    let tagListControl = this.galleryVideosList;
     tagListControl.removeAt(index);
     if (tagListControl.length === 0) {
       this.addTags();
     }
+  }
+  onTimeSelection(utcTime: string, param: string): void {
+    this.createUpdateEvent.get(param)?.setValue(utcTime);
   }
 }

@@ -1,30 +1,44 @@
-<!-- <form [formGroup]="utcDateAndTime" autocomplete="off">
-    <div class="row" id="mat-date-picker">
+<form [formGroup]="utcDateAndTime" autocomplete="off">
+    <div class="row pl-20" id="mat-date-picker">
         <div [ngClass]="customClass" id="order-datepicker"
-            *ngIf="SystemConf['visible'] === 'DATE' || SystemConf['visible'] === 'BOTH'">
+            *ngIf="systemConf['visible'] === 'DATE' || systemConf['visible'] === 'BOTH'">
             <div class=""
-                [ngClass]="SystemConf['dateLabel']==='End Date' ? 'date-picker-panel enddate-cal' : 'date-picker-panel' ">
+                [ngClass]="systemConf['dateLabel']==='End Date' ? 'date-picker-panel enddate-cal' : 'date-picker-panel' ">
                 <div class="input-group">
-                    <input class="form-control" placeholder="yyyy-mm-dd" name="pickupDate" ngbDatepicker
-                        [minDate]="minimumDate" [maxDate]="maximumDate" #pickupDate="ngbDatepicker"
-                        [startDate]="startDate ? startDate : null" formControlName="date"
-                        (blur)="onDateSelection($event)" (dateSelect)="onDateSelection($event)">
+                    <input [markDisabled]="markDisabled" formControlName="date" class="form-control"
+                        (dateSelect)="onDateSelection($event)" [minDate]="minimumDate ? minimumDate : null"
+                        [maxDate]="maximumDate ? maximumDate: null" placeholder="yyyy-mm-dd" name="dp" ngbDatepicker
+                        #d="ngbDatepicker">
+                   
                     <div class="input-group-append">
-                        <button class="btn btn-outline-secondary calendar" (click)="pickupDate.toggle()"
-                            type="button"></button>
+                        <button class="btn btn-outline-secondary calendar" (click)="d.toggle()" type="button">
+                            <fa-icon [icon]="fontData.calender"></fa-icon>
+                        </button>
                     </div>
                 </div>
+                <span class="error-txt"
+                *ngIf="utcDateAndTime.get('date')?.invalid && utcDateAndTime.get('date')?.touched">
+                Field is required</span>
+            </div>
+        </div>
+        <div [ngClass]="customClass"  *ngIf="['TIME','BOTH'].includes(systemConf['visible'])">
+            <div class="form-group position-relative">
                 <div class="row">
                     <div class="col-sm-12">
-                        <div class="d-flex">
-                            <ngb-timepicker formControlName="time" class="mt-5"
-                                [readonlyInputs]="!utcDateAndTime.controls['date'].valid" [meridian]="true"
-                                [seconds]="false" [spinners]="false">
+                        <div class="w-100">
+                            <ngb-timepicker [spinners]="spinners" (ngModelChange)="onTimeSelection($event)"
+                                formControlName="time" [meridian]="true" [seconds]="false" [minuteStep]="15"
+                                [spinners]="true">
+                                <!-- [readonlyInputs]="true" -->
+                                <!--  -->
                             </ngb-timepicker>
+                            <span class="error-txt"
+                                *ngIf="utcDateAndTime.get('time')?.invalid && utcDateAndTime.get('time')?.touched">
+                                Field is required</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</form> -->
+</form>

@@ -48,10 +48,14 @@ export class UiService {
     const page = `blogs/update/${id}`;
     return `${basePath}/${page}`
   }
-
   createEvent() {
     const basePath = this.root();
     const page = 'events/create';
+    return `${basePath}/${page}`
+  }
+  editEvent(id: any) {
+    const basePath = this.root();
+    const page = `events/update/${id}`;
     return `${basePath}/${page}`
   }
   dashboard() {

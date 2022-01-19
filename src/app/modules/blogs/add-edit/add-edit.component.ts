@@ -11,89 +11,102 @@ import { UiService } from 'src/app/shared/services/ui.service';
 })
 
 export class AddEditComponent implements OnInit {
-
+  blogId: any;
   allBlogCategories: any[] = [];
   creatUpdateBlog: FormGroup;
-  get blogForm(){
+  get blogForm() {
     return new FormGroup({
-      "title":new FormControl(null),
-      "content":new FormControl(null),
-      "categoryId":new FormControl(null,Validators.required),
-      "galleryImages":new FormArray([]),
-      "tags":new FormArray([new FormControl('')])
+      "title": new FormControl(null),
+      "content": new FormControl(null),
+      "categoryId": new FormControl(null, Validators.required),
+      "galleryImages": new FormArray([]),
+      "tags": new FormArray([new FormControl('')])
     })
   }
   constructor(private blog: BlogsService,
     private route: ActivatedRoute,
-    private ui: UiService,private router: Router) { 
+    private ui: UiService, private router: Router) {
     this.creatUpdateBlog = this.blogForm;
   }
 
-  get tagList(){
+  get tagList() {
     return (this.creatUpdateBlog.get('tags') as FormArray);
   }
 
   ngOnInit(): void {
     this.getAllBlogCategories();
-    const blogId = this.route.snapshot.params?.id;
-    if(blogId){
-      this.creatUpdateBlog.addControl('_id', new FormControl(null, Validators.required))
+    this.blogId = this.route.snapshot.params?.id;
+    if (this.blogId) {
+      this.creatUpdateBlog.addControl('id', new FormControl(null, Validators.required))
       this.creatUpdateBlog.removeControl('tags');
-      this.creatUpdateBlog.addControl('tags',new FormArray([]));
-      this.getBlogById(blogId)
+      this.creatUpdateBlog.addControl('tags', new FormArray([]));
+      this.getBlogById(this.blogId)
     }
   }
 
-  getAllBlogCategories(){
+  getAllBlogCategories() {
     this.blog.getAllBlogCategories()
-    .toPromise()
-    .then((res: any) => {
-      if(res['code'] === 200){
-        const result = res['result']?.data;
-        this.allBlogCategories = result;
-      }
-    })
-    .catch((error) => {
-      console.error(error)
-    })
-  }
-
-  getBlogById(id: string){
-    this.blog.get(id)
-    .toPromise()
-    .then((res: any) => {
-      if(res['code'] === 200){
-        const result = res['result'];
-        if(result['tags'].length){
-          for(let i = 0; i < result['tags'].length;i++){
-            this.addTags()
-          }
+      .toPromise()
+      .then((res: any) => {
+        if (res['code'] === 200) {
+          const result = res['result']?.data;
+          this.allBlogCategories = result;
         }
-        this.creatUpdateBlog.reset(result);
-        this.creatUpdateBlog.get('tags')?.setValue(result['tags'])
-      }
-    })
-    .catch((error) => {
-      console.error(error)
-    })
+      })
+      .catch((error) => {
+        console.error(error)
+      })
   }
 
-  saveBlog(){
+  getBlogById(id: string) {
+    this.blog.get(id)
+      .toPromise()
+      .then((res: any) => {
+        if (res['code'] === 200) {
+          const result = res['result'];
+          if (result['tags'].length) {
+            for (let i = 0; i < result['tags'].length; i++) {
+              this.addTags()
+            }
+          }
+          this.creatUpdateBlog.reset(result);
+          this.creatUpdateBlog.get('tags')?.setValue(result['tags'])
+          this.creatUpdateBlog.get('id')?.setValue(result['_id'])
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+  }
+
+  saveBlog() {
     const formData = this.creatUpdateBlog.getRawValue();
-    if(this.creatUpdateBlog.invalid){
+    if (this.creatUpdateBlog.invalid) {
       return
     }
-    this.blog.add(formData)
-    .toPromise()
-    .then((res) => {
-      this.router.navigate([this.ui.blogs()])
-    })
-    .catch((error) => {
-      console.error(error)
-    })
+    if(this.blogId){
+      this.blog.update(formData)
+      .toPromise()
+      .then((res) => {
+        this.router.navigate([this.ui.blogs()])
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    }else{
+      this.blog.add(formData)
+      .toPromise()
+      .then((res) => {
+        this.router.navigate([this.ui.blogs()])
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    }
+     
   }
 
-  resetBlog(){
+  resetBlog() {
     this.creatUpdateBlog = this.blogForm;
   }
 
