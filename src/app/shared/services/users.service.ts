@@ -1,12 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { SharedService } from './shared.service';
-
 @Injectable({
   providedIn: 'root'
 })
-export class BlogsService {
-  apiUrl = 'blog/';
+export class UsersService {
+  apiUrl = 'users/';
   userId = '';
   constructor(
     private http: HttpClient,
@@ -54,7 +53,7 @@ export class BlogsService {
     return this.http.get(url);
   }
   getCount() {
-    const url = this.apiUrl + this.userId + '/counts';
+    const url = this.apiUrl + this.userId + '/dashboard/counts';
     return this.http.get(url);
   }
 }

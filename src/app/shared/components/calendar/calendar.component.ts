@@ -22,7 +22,9 @@ import {
   CalendarEventTimesChangedEvent,
   CalendarView,
 } from 'angular-calendar';
-
+import { EventsService } from '../../services/events.service';
+import { SharedService } from '../../services/shared.service';
+import * as moment from 'moment';
 const colors: any = {
   red: {
     primary: '#ad2121',
@@ -99,50 +101,21 @@ export class CalendarComponent implements OnInit {
   refresh = new Subject<void>();
 
   events: CalendarEvent[] = [
-    {
-      start: subDays(startOfDay(new Date()), 1),
-      end: addDays(new Date(), 1),
-      title: 'A 3 day event',
-      color: colors.red,
-      actions: this.actions,
-      allDay: true,
-      resizable: {
-        beforeStart: true,
-        afterEnd: true,
-      },
-      draggable: true,
-    },
-    {
-      start: startOfDay(new Date()),
-      title: 'An event with no end date',
-      color: colors.yellow,
-      actions: this.actions,
-    },
-    {
-      start: subDays(endOfMonth(new Date()), 3),
-      end: addDays(endOfMonth(new Date()), 3),
-      title: 'A long event that spans 2 months',
-      color: colors.blue,
-      allDay: true,
-    },
-    {
-      start: addHours(startOfDay(new Date()), 2),
-      end: addHours(new Date(), 2),
-      title: 'A draggable and resizable event',
-      color: colors.yellow,
-      actions: this.actions,
-      resizable: {
-        beforeStart: true,
-        afterEnd: true,
-      },
-      draggable: true,
-    },
   ];
 
   activeDayIsOpen: boolean = true;
-  constructor(private modal: NgbModal) { }
+  listData: Array<any> = [];
+  totalCount: number = 0;
+  totalPages: number = 0;
+  pageList: Array<number> = [];
+  pageLimitList: Array<number> = [5,10,20,50,100]
+  paginationObject = { isPagination: true, page: 1, limit: 5 , filterList : [],sortHeader:"createAt",sortDirection:"ASC" }
+  currentUtcOffset:any;
+  constructor(private modal: NgbModal,private sharedService: SharedService,private eventsService:EventsService) { }
 
   ngOnInit(): void {
+    this.currentUtcOffset = moment.tz(this.sharedService.getTimeZone()).utcOffset();
+    this.getList();
   }
 
   dayClicked({ date, events }: { date: Date; events: CalendarEvent[] }): void {
@@ -213,5 +186,44 @@ export class CalendarComponent implements OnInit {
 
   close() {
 
+  }
+  getList() {
+    this.sharedService.changeLoaderStatus(true)
+    this.eventsService.list(this.paginationObject).subscribe((res: any) => {
+      if (res['code'] === 200) {
+        this.listData = res['result']['data']
+        this.totalCount = res['result']['totalCount'];
+        this.totalPages = res['result']['totalPages'];
+        this.pageList = [];
+        for (let i = 1; i <= this.totalPages; i++) {
+          this.pageList.push(i);
+        }
+        this.events=[];
+        for (const iterator of this.listData) {
+          this.events.push({
+            start: this.nativeDateFromTime(iterator['startDateTime']),
+            end: this.nativeDateFromTime(iterator['endDateTime']),
+            title: iterator['title'],
+            color: colors.blue,
+            resizable: {
+              beforeStart: true,
+              afterEnd: true,
+            },
+            draggable: false,
+          },)
+        }
+        this.sharedService.changeLoaderStatus(false)
+      }
+    }, (error: any) => {
+      this.listData = [];
+      this.totalCount = 0;
+      this.totalPages = 0
+      this.pageList = [];
+      this.sharedService.changeLoaderStatus(false)
+    })
+  }
+  nativeDateFromTime(date:any) {
+    const date_out = moment.utc(date).utcOffset(this.currentUtcOffset);
+    return new Date(date_out.year(), date_out.month(), date_out.date(), date_out.hour(), date_out.minute(), date_out.second(), date_out.millisecond());
   }
 }

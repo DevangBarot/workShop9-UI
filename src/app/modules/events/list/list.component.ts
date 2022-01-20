@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { BlogsService } from 'src/app/shared/services/blogs.service';
 import { EventsService } from 'src/app/shared/services/events.service';
 import { SharedService } from 'src/app/shared/services/shared.service';
 import { UiService } from 'src/app/shared/services/ui.service';
 import * as moment from 'moment';
 import { faEdit,faTrash,faToggleOn,faToggleOff,faCalendarCheck ,faArrowAltCircleRight} from '@fortawesome/free-solid-svg-icons';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
 @Component({
   selector: 'app-list',
   templateUrl: './list.component.html',
@@ -19,12 +20,18 @@ export class ListComponent implements OnInit {
   fontData={edit:faEdit,delete:faTrash,active:faToggleOn,inActive:faToggleOff,calender:faCalendarCheck,join:faArrowAltCircleRight};
   paginationObject = { isPagination: true, page: 1, limit: 5 , filterList : [],sortHeader:"createAt",sortDirection:"ASC" }
   selectedTimeZone:string='';
-  dateFormat:string=''
-  constructor(public ui: UiService, public sharedService: SharedService, public eventsService: EventsService) { }
+  dateFormat:string='';
+  selectedData:any;
+  constructor(
+    public ui: UiService, 
+    public sharedService: SharedService, 
+    public eventsService: EventsService,
+    private modalService: NgbModal,
+    private toaster: ToastrService
+    ) { }
 
   ngOnInit(): void {
     this.selectedTimeZone=moment.tz.guess();
-    console.log(this.selectedTimeZone)
     this.dateFormat='MMM dd yyyy hh:mm a';
     this.getList();
   }
@@ -55,5 +62,32 @@ export class ListComponent implements OnInit {
   changePage(e: any) {
     this.paginationObject.page = e;
     this.getList();
+  }
+
+  open(content: any,data:any) {
+    this.selectedData = data;
+    this.modalService.open(content, { ariaLabelledBy: 'modal-basic-title' }).result.then((result) => {
+    }, (reason) => {
+      close();
+    });
+  }
+  close() {
+    this.modalService.dismissAll();
+    this.selectedData={};
+  }
+  deleteBlog() {
+    this.sharedService.changeLoaderStatus(true);
+    this.eventsService.delete(this.selectedData['_id'])
+    .toPromise()
+    .then((res:any) => {
+      this.toaster.success('Success', res['message'])
+      this.close();
+      this.getList();
+      this.sharedService.changeLoaderStatus(false);
+    })
+    .catch((error) => {
+      this.sharedService.changeLoaderStatus(false);
+      this.toaster.error('Error', error.error.message)
+    })
   }
 }
